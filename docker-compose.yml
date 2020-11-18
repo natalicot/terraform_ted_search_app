@@ -1,0 +1,55 @@
+version: '3.1'
+
+
+services:
+
+  # maven:
+  #   container_name: maven
+  #   image: maven:3.6.3-jdk-8
+  #   volumes:
+  #     - "/home/natli/.m2/repository:/.m2/repository"
+  #     - "./suggest-lib:/suggest-lib"
+  #     - "./entrypoint.sh:/entrypoint.sh"
+  #   ports:
+  #     - "82:80"
+  #   command: bash -c "chmod 700 /entrypoint.sh; ./entrypoint.sh"
+     
+  jenkins:
+    image: jenkins
+    volumes:
+      - "maven_jenkins_home:/var/jenkins_home"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./rootkey.csv:/.aws/credentials"
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+
+  gitlab:
+    image: gitlab/gitlab-ce
+    volumes:
+      - "maven_gitlab_conf:/etc/gitlab"
+      - "maven_gitlab_data:/var/opt/gitlab"
+    ports:
+      - "8081:80"
+      - "22:22"
+
+  artifactory:
+    image: docker.bintray.io/jfrog/artifactory-oss:latest
+    ports:
+      - "8082:8082"
+      - "8087:8081"
+    volumes:
+      - "maven_artifactory_conf:/var/opt/jfrog/artifactory"
+
+
+
+
+volumes: 
+  maven_jenkins_home:
+    external: true
+  maven_gitlab_data:
+    external: true
+  maven_gitlab_conf:
+    external: true
+  maven_artifactory_conf:
+    external: true
